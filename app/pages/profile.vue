@@ -123,12 +123,15 @@
                 @click.stop
                 @keydown.enter="saveEdit(trait)"
                 @keydown.escape="cancelEdit"
-                class="bg-transparent border-b border-cyan-400/50 text-sm font-medium text-white ml-1 outline-none w-24"
+                class="bg-transparent border-b border-cyan-400/50 text-sm font-medium text-white ml-1 outline-none min-w-[3em]"
+                :style="{ width: Math.max(editingValue.length * 0.85, 3) + 'em' }"
                 ref="editInput"
                 autofocus
               />
-              <button @click.stop="saveEdit(trait)" class="text-[10px] ml-1 text-emerald-400 hover:text-emerald-300">✓</button>
-              <button @click.stop="handleDelete(trait)" class="text-[10px] ml-1 text-red-400 hover:text-red-300">✕</button>
+              <span class="inline-flex items-center gap-3 ml-3">
+                <button @click.stop="saveEdit(trait)" class="text-xs px-1.5 py-0.5 text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/10 rounded transition-colors" title="保存">✓ 保存</button>
+                <button @click.stop="confirmDelete(trait)" class="text-xs px-1.5 py-0.5 text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded transition-colors" title="删除">✕ 删除</button>
+              </span>
             </template>
             <!-- Confidence bar -->
             <div class="absolute bottom-0 left-0 h-0.5 rounded-full bg-emerald-500/50" :style="{ width: (trait.confidence * 100) + '%' }" />
@@ -160,6 +163,25 @@
       <span class="animate-spin inline-block">⏳</span>
       <p class="text-sm text-slate-500 mt-2">加载中...</p>
     </div>
+
+    <!-- Delete Confirmation Dialog -->
+    <Teleport to="body">
+      <Transition name="fade">
+        <div v-if="deletingTrait" class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm" @click="deletingTrait = null">
+          <div class="bg-slate-900 border border-white/10 rounded-2xl p-6 max-w-sm mx-4 shadow-2xl" @click.stop>
+            <p class="text-lg font-semibold text-white mb-2">确认删除</p>
+            <p class="text-sm text-slate-400 mb-1">
+              确定要删除标签 <span class="text-white font-medium">「{{ deletingTrait.key }}」</span> 吗？
+            </p>
+            <p class="text-xs text-slate-500 mb-5">当前值：{{ deletingTrait.value }}</p>
+            <div class="flex justify-end gap-3">
+              <button @click="deletingTrait = null" class="px-4 py-2 text-sm text-slate-400 hover:text-white rounded-lg hover:bg-white/5 transition-colors">取消</button>
+              <button @click="executeDelete" class="px-4 py-2 text-sm text-white bg-red-600 hover:bg-red-500 rounded-lg transition-colors">删除</button>
+            </div>
+          </div>
+        </div>
+      </Transition>
+    </Teleport>
   </div>
 </template>
 
@@ -168,6 +190,7 @@ const profile = ref<any>(null)
 const editingTrait = ref<any>(null)
 const editingValue = ref('')
 const showAddForm = ref(false)
+const deletingTrait = ref<any>(null)
 const newTrait = reactive({ category: 'basic', key: '', value: '' })
 
 const traitCount = computed(() => {
@@ -216,12 +239,18 @@ async function saveEdit(trait: any) {
   }
 }
 
-async function handleDelete(trait: any) {
+function confirmDelete(trait: any) {
+  deletingTrait.value = trait
+}
+
+async function executeDelete() {
+  if (!deletingTrait.value) return
   try {
     await $fetch('/api/profile-trait', {
       method: 'POST',
-      body: { action: 'delete', id: trait.id },
+      body: { action: 'delete', id: deletingTrait.value.id },
     })
+    deletingTrait.value = null
     cancelEdit()
     await loadProfile()
   } catch (e) {
@@ -289,5 +318,13 @@ function formatDate(dateStr: string) {
 .slide-leave-to {
   opacity: 0;
   transform: translateY(-8px);
+}
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.2s ease;
+}
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
 }
 </style>
