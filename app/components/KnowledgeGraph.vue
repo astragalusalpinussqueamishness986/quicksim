@@ -8,14 +8,7 @@
       <p class="text-slate-400 text-sm">还没有足够的数据生成知识图谱</p>
       <p class="text-slate-500 text-xs mt-1">再做几次决策分析，图谱就会丰富起来</p>
     </div>
-    <VChart
-      v-else-if="chartOption"
-      :option="chartOption"
-      :autoresize="true"
-      class="w-full h-[420px]"
-      @mouseover="onNodeHover"
-      @mouseout="hoveredNode = null"
-    />
+    <div v-show="!loading && !isEmpty" ref="chartRef" class="w-full h-[420px]" />
 
     <!-- Tooltip overlay -->
     <Transition name="fade">
@@ -39,18 +32,13 @@
 </template>
 
 <script setup lang="ts">
-import { use } from 'echarts/core'
-import { GraphChart } from 'echarts/charts'
-import { TooltipComponent } from 'echarts/components'
-import { CanvasRenderer } from 'echarts/renderers'
-import VChart from 'vue-echarts'
+import * as echarts from 'echarts'
 
-use([GraphChart, TooltipComponent, CanvasRenderer])
-
+const chartRef = ref<HTMLElement | null>(null)
 const loading = ref(true)
 const isEmpty = ref(false)
 const hoveredNode = ref<any>(null)
-const chartOption = ref<any>(null)
+let chart: echarts.ECharts | null = null
 
 onMounted(async () => {
   try {
@@ -61,17 +49,38 @@ onMounted(async () => {
       return
     }
 
-    chartOption.value = {
+    loading.value = false
+    await nextTick()
+
+    if (!chartRef.value) return
+
+    chart = echarts.init(chartRef.value)
+
+    chart.setOption({
       backgroundColor: 'transparent',
-      tooltip: { show: false },
       animationDuration: 1500,
       animationEasingUpdate: 'quinticInOut',
       series: [
         {
           type: 'graph',
           layout: 'force',
-          data: data.nodes,
-          links: data.edges,
+          data: data.nodes.map((n: any) => ({
+            id: n.id,
+            name: n.name,
+            symbolSize: n.symbolSize,
+            symbol: n.symbol,
+            itemStyle: n.itemStyle,
+            label: n.label,
+            nodeType: n.nodeType,
+            value: n.value,
+            choiceA: n.choiceA,
+            choiceB: n.choiceB,
+          })),
+          links: data.edges.map((e: any) => ({
+            source: e.source,
+            target: e.target,
+            lineStyle: e.lineStyle,
+          })),
           roam: true,
           draggable: true,
           force: {
@@ -90,25 +99,36 @@ onMounted(async () => {
             curveness: 0.1,
           },
           emphasis: {
-            focus: 'adjacency',
             label: { fontSize: 13, fontWeight: 'bold' },
             lineStyle: { width: 3 },
           },
         },
       ],
-    }
-    loading.value = false
-  } catch {
+    })
+
+    chart.on('mouseover', (params: any) => {
+      if (params.dataType === 'node') {
+        hoveredNode.value = params.data
+      }
+    })
+    chart.on('mouseout', () => {
+      hoveredNode.value = null
+    })
+
+    const ro = new ResizeObserver(() => chart?.resize())
+    ro.observe(chartRef.value)
+
+    onUnmounted(() => {
+      ro.disconnect()
+      chart?.dispose()
+      chart = null
+    })
+  } catch (e) {
+    console.error('Knowledge graph error:', e)
     isEmpty.value = true
     loading.value = false
   }
 })
-
-function onNodeHover(params: any) {
-  if (params.dataType === 'node') {
-    hoveredNode.value = params.data
-  }
-}
 </script>
 
 <style scoped>

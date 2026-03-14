@@ -55,7 +55,38 @@
     </div>
 
     <!-- Trait cards by category -->
-    <div v-if="profile" class="space-y-6">
+    <div v-if="profile && traitCount > 0" class="space-y-6">
+      <div class="flex items-center justify-between mb-2">
+        <h2 class="text-base font-semibold text-white">🏷️ 画像标签</h2>
+        <button
+          @click="showAddForm = !showAddForm"
+          class="text-xs px-3 py-1.5 rounded-lg border border-white/10 hover:border-emerald-500/30 text-slate-400 hover:text-emerald-400 transition-all"
+        >
+          + 手动添加
+        </button>
+      </div>
+
+      <!-- Add Trait Form -->
+      <Transition name="slide">
+        <div v-if="showAddForm" class="rounded-xl border border-emerald-500/20 bg-emerald-500/[0.03] p-4 space-y-3">
+          <div class="grid grid-cols-3 gap-3">
+            <select v-model="newTrait.category" class="bg-slate-800 border border-white/10 rounded-lg px-3 py-2 text-sm text-white">
+              <option value="basic">👤 基本信息</option>
+              <option value="career">💼 职业发展</option>
+              <option value="values">💎 价值观</option>
+              <option value="preferences">🎯 偏好特征</option>
+              <option value="life">🏠 生活状况</option>
+            </select>
+            <input v-model="newTrait.key" placeholder="标签名（如：年龄）" class="bg-slate-800 border border-white/10 rounded-lg px-3 py-2 text-sm text-white placeholder-slate-500" />
+            <input v-model="newTrait.value" placeholder="值（如：25岁）" class="bg-slate-800 border border-white/10 rounded-lg px-3 py-2 text-sm text-white placeholder-slate-500" />
+          </div>
+          <div class="flex justify-end gap-2">
+            <button @click="showAddForm = false" class="text-xs px-3 py-1.5 text-slate-400 hover:text-white">取消</button>
+            <button @click="handleAddTrait" :disabled="!newTrait.key || !newTrait.value" class="text-xs px-4 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white disabled:opacity-30 disabled:cursor-not-allowed transition-colors">添加</button>
+          </div>
+        </div>
+      </Transition>
+
       <div
         v-for="(traits, category) in profile.traits"
         :key="category"
@@ -69,12 +100,36 @@
         <div class="flex flex-wrap gap-2">
           <div
             v-for="trait in (traits as any[])"
-            :key="trait.key"
-            class="group relative px-3 py-2 rounded-xl border transition-all"
-            :class="confidenceClass(trait.confidence)"
+            :key="trait.id"
+            class="group relative px-3 py-2 rounded-xl border transition-all cursor-pointer"
+            :class="[
+              confidenceClass(trait.confidence),
+              editingTrait?.id === trait.id ? 'ring-1 ring-cyan-400/50' : ''
+            ]"
+            @click="startEdit(trait)"
           >
-            <span class="text-xs text-slate-400">{{ trait.key }}</span>
-            <span class="text-sm font-medium text-white ml-1">{{ trait.value }}</span>
+            <!-- Normal display -->
+            <template v-if="editingTrait?.id !== trait.id">
+              <span class="text-xs text-slate-400">{{ trait.key }}</span>
+              <span class="text-sm font-medium text-white ml-1">{{ trait.value }}</span>
+              <!-- Edit hint on hover -->
+              <span class="text-[10px] text-slate-500 ml-1 opacity-0 group-hover:opacity-100 transition-opacity">✏️</span>
+            </template>
+            <!-- Editing mode -->
+            <template v-else>
+              <span class="text-xs text-cyan-400">{{ trait.key }}:</span>
+              <input
+                v-model="editingValue"
+                @click.stop
+                @keydown.enter="saveEdit(trait)"
+                @keydown.escape="cancelEdit"
+                class="bg-transparent border-b border-cyan-400/50 text-sm font-medium text-white ml-1 outline-none w-24"
+                ref="editInput"
+                autofocus
+              />
+              <button @click.stop="saveEdit(trait)" class="text-[10px] ml-1 text-emerald-400 hover:text-emerald-300">✓</button>
+              <button @click.stop="handleDelete(trait)" class="text-[10px] ml-1 text-red-400 hover:text-red-300">✕</button>
+            </template>
             <!-- Confidence bar -->
             <div class="absolute bottom-0 left-0 h-0.5 rounded-full bg-emerald-500/50" :style="{ width: (trait.confidence * 100) + '%' }" />
           </div>
@@ -110,6 +165,10 @@
 
 <script setup lang="ts">
 const profile = ref<any>(null)
+const editingTrait = ref<any>(null)
+const editingValue = ref('')
+const showAddForm = ref(false)
+const newTrait = reactive({ category: 'basic', key: '', value: '' })
 
 const traitCount = computed(() => {
   if (!profile.value?.traits) return 0
@@ -121,13 +180,70 @@ const categoryCount = computed(() => {
   return Object.keys(profile.value.traits).length
 })
 
-onMounted(async () => {
+async function loadProfile() {
   try {
     profile.value = await $fetch('/api/profile')
   } catch {
     profile.value = { traits: {}, decisions: [], decisionCount: 0, summary: '' }
   }
-})
+}
+
+onMounted(loadProfile)
+
+function startEdit(trait: any) {
+  editingTrait.value = trait
+  editingValue.value = trait.value
+}
+
+function cancelEdit() {
+  editingTrait.value = null
+  editingValue.value = ''
+}
+
+async function saveEdit(trait: any) {
+  if (!editingValue.value.trim()) return
+  try {
+    await $fetch('/api/profile-trait', {
+      method: 'POST',
+      body: { action: 'update', id: trait.id, value: editingValue.value.trim() },
+    })
+    trait.value = editingValue.value.trim()
+    trait.confidence = 1.0
+    cancelEdit()
+    await loadProfile()
+  } catch (e) {
+    console.error('Update failed:', e)
+  }
+}
+
+async function handleDelete(trait: any) {
+  try {
+    await $fetch('/api/profile-trait', {
+      method: 'POST',
+      body: { action: 'delete', id: trait.id },
+    })
+    cancelEdit()
+    await loadProfile()
+  } catch (e) {
+    console.error('Delete failed:', e)
+  }
+}
+
+async function handleAddTrait() {
+  if (!newTrait.key.trim() || !newTrait.value.trim()) return
+  try {
+    await $fetch('/api/profile-trait', {
+      method: 'POST',
+      body: { action: 'add', category: newTrait.category, key: newTrait.key.trim(), value: newTrait.value.trim() },
+    })
+    newTrait.key = ''
+    newTrait.value = ''
+    showAddForm.value = false
+    await loadProfile()
+  } catch (e) {
+    console.error('Add failed:', e)
+  }
+}
 
 function categoryIcon(cat: string) {
   const icons: Record<string, string> = {
@@ -163,3 +279,15 @@ function formatDate(dateStr: string) {
   return `${d.getMonth() + 1}/${d.getDate()}`
 }
 </script>
+
+<style scoped>
+.slide-enter-active,
+.slide-leave-active {
+  transition: all 0.2s ease;
+}
+.slide-enter-from,
+.slide-leave-to {
+  opacity: 0;
+  transform: translateY(-8px);
+}
+</style>

@@ -110,6 +110,29 @@ export function upsertTraits(traits: { category: string; key: string; value: str
   tx()
 }
 
+export function updateTrait(id: number, value: string) {
+  return getDb().prepare(`
+    UPDATE user_traits SET value = ?, confidence = 1.0, source = '用户手动修改', updated_at = datetime('now')
+    WHERE id = ?
+  `).run(value, id)
+}
+
+export function deleteTrait(id: number) {
+  return getDb().prepare('DELETE FROM user_traits WHERE id = ?').run(id)
+}
+
+export function addTrait(data: { category: string; key: string; value: string }) {
+  return getDb().prepare(`
+    INSERT INTO user_traits (category, key, value, confidence, source, updated_at)
+    VALUES (?, ?, ?, 1.0, '用户手动添加', datetime('now'))
+    ON CONFLICT(category, key) DO UPDATE SET
+      value = excluded.value,
+      confidence = 1.0,
+      source = '用户手动添加',
+      updated_at = datetime('now')
+  `).run(data.category, data.key, data.value)
+}
+
 export function addDecision(data: {
   question: string
   choiceA?: string

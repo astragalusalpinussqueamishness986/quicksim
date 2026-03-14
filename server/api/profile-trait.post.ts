@@ -1,0 +1,35 @@
+/**
+ * API: Update or delete a user trait
+ */
+import { updateTrait, deleteTrait, addTrait } from '../db/profile'
+
+export default defineEventHandler(async (event) => {
+  const body = await readBody(event)
+  const { action, id, value, category, key } = body
+
+  if (action === 'update') {
+    if (!id || !value) {
+      throw createError({ statusCode: 400, message: '缺少 id 或 value' })
+    }
+    updateTrait(id, value)
+    return { ok: true, action: 'updated' }
+  }
+
+  if (action === 'delete') {
+    if (!id) {
+      throw createError({ statusCode: 400, message: '缺少 id' })
+    }
+    deleteTrait(id)
+    return { ok: true, action: 'deleted' }
+  }
+
+  if (action === 'add') {
+    if (!category || !key || !value) {
+      throw createError({ statusCode: 400, message: '缺少 category, key 或 value' })
+    }
+    addTrait({ category, key, value })
+    return { ok: true, action: 'added' }
+  }
+
+  throw createError({ statusCode: 400, message: '无效 action，支持 update/delete/add' })
+})
