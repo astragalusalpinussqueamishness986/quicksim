@@ -123,8 +123,8 @@
                 @click.stop
                 @keydown.enter="saveEdit(trait)"
                 @keydown.escape="cancelEdit"
-                class="bg-transparent border-b border-cyan-400/50 text-sm font-medium text-white ml-1 outline-none min-w-[3em]"
-                :style="{ width: Math.max(editingValue.length * 0.85, 3) + 'em' }"
+                class="bg-transparent border-b border-cyan-400/50 text-sm font-medium text-white ml-1 outline-none min-w-[5em]"
+                :style="{ width: (editingValue.length + 2) + 'em' }"
                 ref="editInput"
                 autofocus
               />
