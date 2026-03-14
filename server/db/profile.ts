@@ -168,6 +168,12 @@ export function getGraphData() {
   return { traits, decisions, links }
 }
 
+export function deleteDecision(id: number) {
+  const db = getDb()
+  db.prepare('DELETE FROM decision_traits WHERE decision_id = ?').run(id)
+  db.prepare('DELETE FROM decisions WHERE id = ?').run(id)
+}
+
 export function getRecentDecisions(limit = 10) {
   return getDb().prepare('SELECT * FROM decisions ORDER BY created_at DESC LIMIT ?').all(limit)
 }

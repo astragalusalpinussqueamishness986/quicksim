@@ -147,13 +147,18 @@
         <div
           v-for="d in (profile.decisions as any[])"
           :key="d.id"
-          class="flex items-center gap-3 rounded-xl border border-white/5 bg-white/[0.02] px-4 py-3"
+          class="group flex items-center gap-3 rounded-xl border border-white/5 bg-white/[0.02] px-4 py-3 hover:border-white/10 transition-colors"
         >
           <span class="text-xs text-slate-500 shrink-0">{{ formatDate(d.created_at) }}</span>
           <span class="text-sm text-slate-300 flex-1 truncate">{{ d.question }}</span>
-          <span v-if="d.choice_a && d.choice_b" class="text-xs text-slate-500">
+          <span v-if="d.choice_a && d.choice_b" class="text-xs text-slate-500 shrink-0">
             {{ d.choice_a }} vs {{ d.choice_b }}
           </span>
+          <button
+            @click="confirmDeleteDecision(d)"
+            class="text-xs text-slate-600 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-all shrink-0"
+            title="删除此决策记录"
+          >✕</button>
         </div>
       </div>
     </div>
@@ -167,16 +172,14 @@
     <!-- Delete Confirmation Dialog -->
     <Teleport to="body">
       <Transition name="fade">
-        <div v-if="deletingTrait" class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm" @click="deletingTrait = null">
+        <div v-if="deleteConfirm" class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm" @click="deleteConfirm = null">
           <div class="bg-slate-900 border border-white/10 rounded-2xl p-6 max-w-sm mx-4 shadow-2xl" @click.stop>
             <p class="text-lg font-semibold text-white mb-2">确认删除</p>
-            <p class="text-sm text-slate-400 mb-1">
-              确定要删除标签 <span class="text-white font-medium">「{{ deletingTrait.key }}」</span> 吗？
-            </p>
-            <p class="text-xs text-slate-500 mb-5">当前值：{{ deletingTrait.value }}</p>
-            <div class="flex justify-end gap-3">
-              <button @click="deletingTrait = null" class="px-4 py-2 text-sm text-slate-400 hover:text-white rounded-lg hover:bg-white/5 transition-colors">取消</button>
-              <button @click="executeDelete" class="px-4 py-2 text-sm text-white bg-red-600 hover:bg-red-500 rounded-lg transition-colors">删除</button>
+            <p class="text-sm text-slate-400 mb-1">{{ deleteConfirm.message }}</p>
+            <p v-if="deleteConfirm.detail" class="text-xs text-slate-500 mb-5">{{ deleteConfirm.detail }}</p>
+            <div class="flex justify-end gap-3 mt-5">
+              <button @click="deleteConfirm = null" class="px-4 py-2 text-sm text-slate-400 hover:text-white rounded-lg hover:bg-white/5 transition-colors">取消</button>
+              <button @click="executeConfirmedDelete" class="px-4 py-2 text-sm text-white bg-red-600 hover:bg-red-500 rounded-lg transition-colors">删除</button>
             </div>
           </div>
         </div>
@@ -190,7 +193,7 @@ const profile = ref<any>(null)
 const editingTrait = ref<any>(null)
 const editingValue = ref('')
 const showAddForm = ref(false)
-const deletingTrait = ref<any>(null)
+const deleteConfirm = ref<{ type: string; id: number; message: string; detail?: string } | null>(null)
 const newTrait = reactive({ category: 'basic', key: '', value: '' })
 
 const traitCount = computed(() => {
@@ -240,17 +243,32 @@ async function saveEdit(trait: any) {
 }
 
 function confirmDelete(trait: any) {
-  deletingTrait.value = trait
+  deleteConfirm.value = {
+    type: 'trait',
+    id: trait.id,
+    message: `确定要删除标签「${trait.key}」吗？`,
+    detail: `当前值：${trait.value}`,
+  }
 }
 
-async function executeDelete() {
-  if (!deletingTrait.value) return
+function confirmDeleteDecision(d: any) {
+  deleteConfirm.value = {
+    type: 'decision',
+    id: d.id,
+    message: `确定要删除决策记录吗？`,
+    detail: d.question + (d.choice_a && d.choice_b ? ` (${d.choice_a} vs ${d.choice_b})` : ''),
+  }
+}
+
+async function executeConfirmedDelete() {
+  if (!deleteConfirm.value) return
+  const { type, id } = deleteConfirm.value
   try {
     await $fetch('/api/profile-trait', {
       method: 'POST',
-      body: { action: 'delete', id: deletingTrait.value.id },
+      body: { action: type === 'decision' ? 'delete_decision' : 'delete', id },
     })
-    deletingTrait.value = null
+    deleteConfirm.value = null
     cancelEdit()
     await loadProfile()
   } catch (e) {

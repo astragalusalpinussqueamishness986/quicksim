@@ -1,7 +1,7 @@
 /**
  * API: Update or delete a user trait
  */
-import { updateTrait, deleteTrait, addTrait } from '../db/profile'
+import { updateTrait, deleteTrait, addTrait, deleteDecision } from '../db/profile'
 
 export default defineEventHandler(async (event) => {
   const body = await readBody(event)
@@ -31,5 +31,13 @@ export default defineEventHandler(async (event) => {
     return { ok: true, action: 'added' }
   }
 
-  throw createError({ statusCode: 400, message: '无效 action，支持 update/delete/add' })
+  if (action === 'delete_decision') {
+    if (!id) {
+      throw createError({ statusCode: 400, message: '缺少 id' })
+    }
+    deleteDecision(id)
+    return { ok: true, action: 'decision_deleted' }
+  }
+
+  throw createError({ statusCode: 400, message: '无效 action' })
 })
