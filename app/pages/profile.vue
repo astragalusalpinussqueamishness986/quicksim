@@ -28,6 +28,25 @@
       </div>
     </div>
 
+    <!-- Knowledge Graph -->
+    <div v-if="profile" class="mb-8">
+      <div class="flex items-center gap-2 mb-3">
+        <span class="text-lg">🕸️</span>
+        <h2 class="text-base font-semibold text-white">知识图谱</h2>
+        <span class="text-xs text-slate-500">特征关系网络</span>
+      </div>
+      <div class="rounded-2xl border border-white/10 bg-white/[0.03] overflow-hidden">
+        <ClientOnly>
+          <KnowledgeGraph />
+          <template #fallback>
+            <div class="flex items-center justify-center h-[420px]">
+              <span class="animate-spin text-2xl">⏳</span>
+            </div>
+          </template>
+        </ClientOnly>
+      </div>
+    </div>
+
     <!-- Empty state -->
     <div v-if="profile && traitCount === 0" class="text-center py-16">
       <p class="text-6xl mb-4">🌱</p>

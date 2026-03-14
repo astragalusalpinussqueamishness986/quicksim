@@ -2,7 +2,7 @@
  * API: Extract user traits from a decision question + brief
  * Called after each decision to build user profile
  */
-import { upsertTraits, addDecision } from '../db/profile'
+import { upsertTraits, addDecision, linkDecisionTraits } from '../db/profile'
 
 export default defineEventHandler(async (event) => {
   const body = await readBody(event)
@@ -13,7 +13,7 @@ export default defineEventHandler(async (event) => {
   }
 
   // Save decision to history
-  addDecision({
+  const decisionId = addDecision({
     question,
     choiceA,
     choiceB,
@@ -79,13 +79,15 @@ export default defineEventHandler(async (event) => {
 
     const traits = JSON.parse(jsonStr)
     if (Array.isArray(traits) && traits.length > 0) {
-      upsertTraits(traits.map((t: any) => ({
+      const mappedTraits = traits.map((t: any) => ({
         category: t.category || 'basic',
         key: t.key || '',
         value: t.value || '',
         confidence: t.confidence || 0.5,
         source: question,
-      })))
+      }))
+      upsertTraits(mappedTraits)
+      linkDecisionTraits(decisionId, mappedTraits)
       return { extracted: traits.length, traits }
     }
 

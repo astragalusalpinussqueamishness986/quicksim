@@ -124,6 +124,27 @@ export function addDecision(data: {
   return result.lastInsertRowid
 }
 
+export function linkDecisionTraits(decisionId: number | bigint, traits: { category: string; key: string; value: string }[]) {
+  const stmt = getDb().prepare(`
+    INSERT OR IGNORE INTO decision_traits (decision_id, trait_category, trait_key, trait_value)
+    VALUES (?, ?, ?, ?)
+  `)
+  const tx = getDb().transaction(() => {
+    for (const t of traits) {
+      stmt.run(decisionId, t.category, t.key, t.value)
+    }
+  })
+  tx()
+}
+
+export function getGraphData() {
+  const db = getDb()
+  const traits = db.prepare('SELECT * FROM user_traits ORDER BY category, key').all() as any[]
+  const decisions = db.prepare('SELECT * FROM decisions ORDER BY created_at DESC').all() as any[]
+  const links = db.prepare('SELECT * FROM decision_traits').all() as any[]
+  return { traits, decisions, links }
+}
+
 export function getRecentDecisions(limit = 10) {
   return getDb().prepare('SELECT * FROM decisions ORDER BY created_at DESC LIMIT ?').all(limit)
 }
