@@ -1,6 +1,6 @@
 <template>
   <div v-if="scenario">
-    <NuxtLink to="/" class="inline-flex items-center gap-1 text-slate-400 hover:text-white mb-6 transition-colors">
+    <NuxtLink to="/" class="inline-flex items-center gap-1 text-content-secondary hover:text-content mb-6 transition-colors">
       ← 返回场景列表
     </NuxtLink>
 
@@ -8,30 +8,30 @@
       <span class="text-4xl">{{ scenario.icon }}</span>
       <div>
         <h1 class="text-2xl font-bold">{{ scenario.name }}</h1>
-        <p class="text-slate-400">{{ scenario.description }}</p>
+        <p class="text-content-secondary">{{ scenario.description }}</p>
       </div>
     </div>
 
     <!-- Input Form -->
     <form v-if="!result" class="space-y-4 max-w-md" @submit.prevent="runSimulation">
       <div v-for="field in scenario.fields" :key="field.key">
-        <label class="block text-sm font-medium text-slate-300 mb-1">{{ field.label }}</label>
+        <label class="block text-sm font-medium text-content-secondary mb-1">{{ field.label }}</label>
         <input
           v-model="formData[field.key]"
           :type="field.type === 'number' ? 'number' : 'text'"
           :placeholder="field.placeholder"
           required
-          class="w-full rounded-xl bg-white/5 border border-white/10 px-4 py-3 text-white placeholder-slate-500 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none transition-colors"
+          class="w-full rounded-xl bg-surface-card border border-line px-4 py-3 text-content placeholder-content-muted focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none transition-colors"
         />
       </div>
       <button
         type="submit"
         :disabled="loading"
-        class="w-full py-3 rounded-xl font-semibold text-white bg-gradient-to-r from-indigo-500 to-cyan-500 hover:from-indigo-600 hover:to-cyan-600 disabled:opacity-50 transition-all"
+        class="w-full py-3 rounded-xl font-semibold text-content bg-gradient-to-r from-indigo-500 to-cyan-500 hover:from-indigo-600 hover:to-cyan-600 disabled:opacity-50 transition-all"
       >
         {{ loading ? '⏳ AI 正在推演...' : '🚀 开始推演' }}
       </button>
-      <p v-if="loading" class="text-sm text-slate-500 text-center">预计需要 10-20 秒，请稍候...</p>
+      <p v-if="loading" class="text-sm text-content-muted text-center">预计需要 10-20 秒，请稍候...</p>
     </form>
 
     <!-- ===== Structured Results ===== -->
@@ -42,7 +42,7 @@
 
       <!-- 1. Summary Banner -->
       <div class="rounded-2xl bg-gradient-to-r p-[1px]" :class="scenario.color">
-        <div class="rounded-2xl bg-slate-900 p-5 text-center">
+        <div class="rounded-2xl bg-surface-secondary p-5 text-center">
           <p class="text-xl font-bold">{{ result.summary }}</p>
         </div>
       </div>
@@ -52,25 +52,25 @@
         <div
           v-for="(m, i) in result.metrics"
           :key="i"
-          class="rounded-xl border border-white/10 bg-white/5 p-4 text-center"
+          class="rounded-xl border border-line bg-surface-card p-4 text-center"
         >
-          <p class="text-xs text-slate-500 mb-2">{{ m.label }}</p>
+          <p class="text-xs text-content-muted mb-2">{{ m.label }}</p>
           <div class="flex items-center justify-center gap-3">
             <span
               class="text-sm font-semibold"
-              :class="m.winner === 'A' ? 'text-cyan-400' : 'text-slate-300'"
+              :class="m.winner === 'A' ? 'text-cyan-400' : 'text-content-secondary'"
             >{{ m.valueA }}</span>
-            <span class="text-xs text-slate-600">vs</span>
+            <span class="text-xs text-content-faint">vs</span>
             <span
               class="text-sm font-semibold"
-              :class="m.winner === 'B' ? 'text-amber-400' : 'text-slate-300'"
+              :class="m.winner === 'B' ? 'text-amber-400' : 'text-content-secondary'"
             >{{ m.valueB }}</span>
           </div>
         </div>
       </div>
 
       <!-- 3. Radar Chart -->
-      <div class="rounded-2xl border border-white/10 bg-white/5 p-6">
+      <div class="rounded-2xl border border-line bg-surface-card p-6">
         <CompareChart :chart-data="result.chartData" />
       </div>
 
@@ -84,13 +84,13 @@
             class="relative"
           >
             <!-- Timeline dot -->
-            <div class="absolute -left-[25px] w-4 h-4 rounded-full bg-indigo-500 border-2 border-slate-900" />
-            <div class="rounded-xl border border-white/10 bg-white/5 p-4 hover:bg-white/10 transition-colors">
+            <div class="absolute -left-[25px] w-4 h-4 rounded-full bg-indigo-500 border-2 border-surface-secondary" />
+            <div class="rounded-xl border border-line bg-surface-card p-4 hover:bg-surface-hover transition-colors">
               <div class="flex items-center gap-2 mb-2">
                 <span class="text-lg">{{ phase.icon }}</span>
-                <h4 class="font-semibold text-white">{{ phase.title }}</h4>
+                <h4 class="font-semibold text-content">{{ phase.title }}</h4>
               </div>
-              <p class="text-sm text-slate-300 leading-relaxed">{{ phase.content }}</p>
+              <p class="text-sm text-content-secondary leading-relaxed">{{ phase.content }}</p>
             </div>
           </div>
         </div>
@@ -102,34 +102,34 @@
           <span class="text-2xl">🎯</span>
           <div>
             <p class="text-sm text-indigo-400 font-medium mb-1">AI 结论</p>
-            <p class="text-white font-semibold">{{ result.verdict }}</p>
+            <p class="text-content font-semibold">{{ result.verdict }}</p>
           </div>
         </div>
       </div>
 
       <!-- Watermark for export -->
-      <div class="text-center text-xs text-slate-600 pt-2">QuickSim — AI 人生场景速推</div>
+      <div class="text-center text-xs text-content-faint pt-2">QuickSim — AI 人生场景速推</div>
 
       </div><!-- end resultRef -->
 
       <!-- Actions -->
       <div class="flex flex-wrap gap-3 pt-2">
         <button
-          class="px-6 py-2 rounded-xl border border-white/10 hover:bg-white/10 transition-colors"
+          class="px-6 py-2 rounded-xl border border-line hover:bg-surface-hover transition-colors"
           @click="reset"
         >
           🔄 重新推演
         </button>
         <button
           :disabled="exporting"
-          class="px-6 py-2 rounded-xl border border-white/10 hover:bg-white/10 transition-colors disabled:opacity-50"
+          class="px-6 py-2 rounded-xl border border-line hover:bg-surface-hover transition-colors disabled:opacity-50"
           @click="handleExport"
         >
           {{ exporting ? '📸 导出中...' : '📸 导出为图片' }}
         </button>
         <NuxtLink
           to="/"
-          class="px-6 py-2 rounded-xl border border-white/10 hover:bg-white/10 transition-colors"
+          class="px-6 py-2 rounded-xl border border-line hover:bg-surface-hover transition-colors"
         >
           🎲 换个场景
         </NuxtLink>
@@ -138,7 +138,7 @@
   </div>
 
   <div v-else class="text-center py-20">
-    <p class="text-slate-400">场景不存在</p>
+    <p class="text-content-secondary">场景不存在</p>
     <NuxtLink to="/" class="text-indigo-400 hover:underline mt-2 inline-block">返回首页</NuxtLink>
   </div>
 </template>

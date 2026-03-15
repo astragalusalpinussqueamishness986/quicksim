@@ -5,8 +5,8 @@
     </div>
     <div v-else-if="isEmpty" class="flex flex-col items-center justify-center h-[320px] text-center">
       <p class="text-4xl mb-3">🕸️</p>
-      <p class="text-slate-400 text-sm">还没有足够的数据生成知识图谱</p>
-      <p class="text-slate-500 text-xs mt-1">再做几次决策分析，图谱就会丰富起来</p>
+      <p class="text-content-secondary text-sm">还没有足够的数据生成知识图谱</p>
+      <p class="text-content-muted text-xs mt-1">再做几次决策分析，图谱就会丰富起来</p>
     </div>
     <div v-show="!loading && !isEmpty" ref="chartRef" class="w-full h-[420px]" />
 
@@ -14,16 +14,16 @@
     <Transition name="fade">
       <div
         v-if="hoveredNode"
-        class="absolute top-3 right-3 max-w-[220px] rounded-xl border border-white/10 bg-slate-900/95 backdrop-blur p-3 text-xs pointer-events-none z-10"
+        class="absolute top-3 right-3 max-w-[220px] rounded-xl border border-line bg-surface-secondary backdrop-blur p-3 text-xs pointer-events-none z-10"
       >
-        <p class="font-semibold text-white mb-1">{{ hoveredNode.name }}</p>
-        <p v-if="hoveredNode.nodeType === 'trait'" class="text-slate-400">
+        <p class="font-semibold text-content mb-1">{{ hoveredNode.name }}</p>
+        <p v-if="hoveredNode.nodeType === 'trait'" class="text-content-secondary">
           置信度：{{ ((hoveredNode.value || 0) * 100).toFixed(0) }}%
         </p>
-        <p v-if="hoveredNode.nodeType === 'decision'" class="text-slate-400">
+        <p v-if="hoveredNode.nodeType === 'decision'" class="text-content-secondary">
           {{ hoveredNode.choiceA }} vs {{ hoveredNode.choiceB }}
         </p>
-        <p v-if="hoveredNode.nodeType === 'category'" class="text-slate-400">
+        <p v-if="hoveredNode.nodeType === 'category'" class="text-content-secondary">
           类别中心节点
         </p>
       </div>
@@ -34,11 +34,26 @@
 <script setup lang="ts">
 import * as echarts from 'echarts'
 
+const { chartColors } = useChartTheme()
 const chartRef = ref<HTMLElement | null>(null)
 const loading = ref(true)
 const isEmpty = ref(false)
 const hoveredNode = ref<any>(null)
 let chart: echarts.ECharts | null = null
+
+function applyChartColors() {
+  if (!chart) return
+  const colors = chartColors.value
+  chart.setOption({
+    series: [{
+      label: {
+        color: colors.textColor,
+      },
+    }],
+  })
+}
+
+watch(chartColors, applyChartColors)
 
 onMounted(async () => {
   try {
@@ -92,7 +107,7 @@ onMounted(async () => {
           label: {
             show: true,
             position: 'right',
-            color: '#e2e8f0',
+            color: chartColors.value.textColor,
             fontSize: 10,
           },
           lineStyle: {

@@ -54,6 +54,14 @@ function initSchema(db: Database.Database) {
       trait_value TEXT,
       PRIMARY KEY (decision_id, trait_category, trait_key)
     );
+
+    -- Decision style scores per decision (6 dimensions, 0-100)
+    CREATE TABLE IF NOT EXISTS decision_style (
+      decision_id INTEGER REFERENCES decisions(id),
+      dimension TEXT NOT NULL,        -- 'risk', 'rational', 'foresight', 'independence', 'growth', 'pragmatic'
+      score INTEGER NOT NULL,         -- 0-100
+      PRIMARY KEY (decision_id, dimension)
+    );
   `)
 }
 
@@ -180,4 +188,27 @@ export function getRecentDecisions(limit = 10) {
 
 export function getDecisionCount() {
   return (getDb().prepare('SELECT COUNT(*) as count FROM decisions').get() as any).count
+}
+
+export function upsertStyleScores(decisionId: number | bigint, scores: { dimension: string; score: number }[]) {
+  const stmt = getDb().prepare(`
+    INSERT INTO decision_style (decision_id, dimension, score)
+    VALUES (?, ?, ?)
+    ON CONFLICT(decision_id, dimension) DO UPDATE SET score = excluded.score
+  `)
+  const tx = getDb().transaction(() => {
+    for (const s of scores) {
+      stmt.run(decisionId, s.dimension, s.score)
+    }
+  })
+  tx()
+}
+
+export function getAggregatedStyle() {
+  const rows = getDb().prepare(`
+    SELECT dimension, ROUND(AVG(score)) as avg_score, COUNT(*) as sample_count
+    FROM decision_style
+    GROUP BY dimension
+  `).all() as { dimension: string; avg_score: number; sample_count: number }[]
+  return rows
 }

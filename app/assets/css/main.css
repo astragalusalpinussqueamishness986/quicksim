@@ -3,7 +3,43 @@
 @tailwind utilities;
 
 @layer base {
+  /* Light theme (default) */
+  :root {
+    --surface: #ffffff;
+    --surface-secondary: #f8fafc;
+    --surface-card: #f1f5f9;
+    --surface-hover: #e2e8f0;
+    --content: #0f172a;
+    --content-secondary: #475569;
+    --content-muted: #64748b;
+    --content-faint: #94a3b8;
+    --line: #e2e8f0;
+    --line-hover: #cbd5e1;
+    --gradient-from: #f8fafc;
+    --gradient-via: #f1f5f9;
+    --gradient-to: #eef2ff;
+  }
+
+  /* Dark theme */
+  .dark {
+    --surface: #020617;
+    --surface-secondary: #0f172a;
+    --surface-card: rgba(255, 255, 255, 0.03);
+    --surface-hover: rgba(255, 255, 255, 0.08);
+    --content: #ffffff;
+    --content-secondary: #94a3b8;
+    --content-muted: #64748b;
+    --content-faint: #475569;
+    --line: rgba(255, 255, 255, 0.1);
+    --line-hover: rgba(255, 255, 255, 0.2);
+    --gradient-from: #020617;
+    --gradient-via: #0f172a;
+    --gradient-to: #1e1b4b;
+  }
+
   body {
     @apply antialiased;
+    background: linear-gradient(135deg, var(--gradient-from), var(--gradient-via), var(--gradient-to));
+    color: var(--content);
   }
 }

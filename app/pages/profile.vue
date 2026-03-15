@@ -1,41 +1,78 @@
 <template>
   <div>
-    <NuxtLink to="/" class="inline-flex items-center gap-1 text-slate-400 hover:text-white mb-6 transition-colors">
+    <NuxtLink to="/" class="inline-flex items-center gap-1 text-content-secondary hover:text-content mb-4 transition-colors text-sm">
       ← 返回首页
     </NuxtLink>
 
-    <div class="flex items-center gap-3 mb-8">
-      <span class="text-4xl">🧠</span>
+    <div class="flex items-center gap-3 mb-6">
+      <span class="text-3xl">🧠</span>
       <div>
-        <h1 class="text-2xl font-bold">我的决策画像</h1>
-        <p class="text-slate-400">AI 从你的每次决策中学习你的特征</p>
+        <h1 class="text-xl font-bold">我的决策画像</h1>
+        <p class="text-content-secondary text-sm">AI 从你的每次决策中学习你的特征</p>
       </div>
     </div>
 
     <!-- Stats -->
-    <div class="grid grid-cols-3 gap-4 mb-8" v-if="profile">
-      <div class="rounded-xl border border-white/10 bg-white/[0.03] p-4 text-center">
-        <p class="text-3xl font-bold text-white">{{ profile.decisionCount }}</p>
-        <p class="text-xs text-slate-500 mt-1">决策次数</p>
+    <div class="grid grid-cols-3 gap-3 mb-6" v-if="profile">
+      <div class="rounded-xl border border-line bg-surface-card p-3 text-center">
+        <p class="text-2xl font-bold text-content">{{ profile.decisionCount }}</p>
+        <p class="text-[10px] text-content-muted mt-0.5">决策次数</p>
       </div>
-      <div class="rounded-xl border border-white/10 bg-white/[0.03] p-4 text-center">
-        <p class="text-3xl font-bold text-white">{{ traitCount }}</p>
-        <p class="text-xs text-slate-500 mt-1">画像标签</p>
+      <div class="rounded-xl border border-line bg-surface-card p-3 text-center">
+        <p class="text-2xl font-bold text-content">{{ traitCount }}</p>
+        <p class="text-[10px] text-content-muted mt-0.5">画像标签</p>
       </div>
-      <div class="rounded-xl border border-white/10 bg-white/[0.03] p-4 text-center">
-        <p class="text-3xl font-bold text-white">{{ categoryCount }}</p>
-        <p class="text-xs text-slate-500 mt-1">维度覆盖</p>
+      <div class="rounded-xl border border-line bg-surface-card p-3 text-center">
+        <p class="text-2xl font-bold text-content">{{ categoryCount }}</p>
+        <p class="text-[10px] text-content-muted mt-0.5">维度覆盖</p>
+      </div>
+    </div>
+
+    <!-- Dual Radar: Completeness + Decision Style -->
+    <div v-if="profile" class="grid grid-cols-1 lg:grid-cols-2 gap-3 mb-6">
+      <!-- Profile Completeness Radar -->
+      <div class="rounded-2xl border border-line bg-surface-card p-4 overflow-hidden">
+        <div class="flex items-center gap-2 mb-2">
+          <span>📊</span>
+          <h2 class="text-sm font-semibold text-content">画像完整度</h2>
+          <span class="text-[10px] text-content-muted">五维覆盖</span>
+        </div>
+        <ClientOnly>
+          <ProfileRadar :data="profile.completeness" :loading="!profile" />
+          <template #fallback>
+            <div class="flex items-center justify-center h-[280px]">
+              <span class="animate-spin text-2xl">⏳</span>
+            </div>
+          </template>
+        </ClientOnly>
+      </div>
+
+      <!-- Decision Style Radar -->
+      <div class="rounded-2xl border border-line bg-surface-card p-4 overflow-hidden">
+        <div class="flex items-center gap-2 mb-2">
+          <span>🎭</span>
+          <h2 class="text-sm font-semibold text-content">决策风格</h2>
+          <span class="text-[10px] text-content-muted">AI 自动分析</span>
+        </div>
+        <ClientOnly>
+          <DecisionStyle />
+          <template #fallback>
+            <div class="flex items-center justify-center h-[280px]">
+              <span class="animate-spin text-2xl">⏳</span>
+            </div>
+          </template>
+        </ClientOnly>
       </div>
     </div>
 
     <!-- Knowledge Graph -->
-    <div v-if="profile" class="mb-8">
-      <div class="flex items-center gap-2 mb-3">
-        <span class="text-lg">🕸️</span>
-        <h2 class="text-base font-semibold text-white">知识图谱</h2>
-        <span class="text-xs text-slate-500">特征关系网络</span>
+    <div v-if="profile" class="mb-6">
+      <div class="flex items-center gap-2 mb-2">
+        <span>🕸️</span>
+        <h2 class="text-sm font-semibold text-content">知识图谱</h2>
+        <span class="text-[10px] text-content-muted">特征关系网络</span>
       </div>
-      <div class="rounded-2xl border border-white/10 bg-white/[0.03] overflow-hidden">
+      <div class="rounded-2xl border border-line bg-surface-card overflow-hidden">
         <ClientOnly>
           <KnowledgeGraph />
           <template #fallback>
@@ -50,17 +87,17 @@
     <!-- Empty state -->
     <div v-if="profile && traitCount === 0" class="text-center py-16">
       <p class="text-6xl mb-4">🌱</p>
-      <p class="text-lg text-slate-300">画像还是空白的</p>
-      <p class="text-sm text-slate-500 mt-2">去<NuxtLink to="/tree" class="text-emerald-400 hover:underline">决策树</NuxtLink>提问几个问题，AI 会自动学习你的特征</p>
+      <p class="text-lg text-content-secondary">画像还是空白的</p>
+      <p class="text-sm text-content-muted mt-2">去<NuxtLink to="/tree" class="text-emerald-400 hover:underline">决策树</NuxtLink>提问几个问题，AI 会自动学习你的特征</p>
     </div>
 
     <!-- Trait cards by category -->
-    <div v-if="profile && traitCount > 0" class="space-y-6">
-      <div class="flex items-center justify-between mb-2">
-        <h2 class="text-base font-semibold text-white">🏷️ 画像标签</h2>
+    <div v-if="profile && traitCount > 0" class="space-y-4">
+      <div class="flex items-center justify-between">
+        <h2 class="text-sm font-semibold text-content">🏷️ 画像标签</h2>
         <button
           @click="showAddForm = !showAddForm"
-          class="text-xs px-3 py-1.5 rounded-lg border border-white/10 hover:border-emerald-500/30 text-slate-400 hover:text-emerald-400 transition-all"
+          class="text-xs px-3 py-1.5 rounded-lg border border-line hover:border-emerald-500/30 text-content-secondary hover:text-emerald-400 transition-all"
         >
           + 手动添加
         </button>
@@ -70,18 +107,18 @@
       <Transition name="slide">
         <div v-if="showAddForm" class="rounded-xl border border-emerald-500/20 bg-emerald-500/[0.03] p-4 space-y-3">
           <div class="grid grid-cols-3 gap-3">
-            <select v-model="newTrait.category" class="bg-slate-800 border border-white/10 rounded-lg px-3 py-2 text-sm text-white">
+            <select v-model="newTrait.category" class="bg-surface-secondary border border-line rounded-lg px-3 py-2 text-sm text-content">
               <option value="basic">👤 基本信息</option>
               <option value="career">💼 职业发展</option>
               <option value="values">💎 价值观</option>
               <option value="preferences">🎯 偏好特征</option>
               <option value="life">🏠 生活状况</option>
             </select>
-            <input v-model="newTrait.key" placeholder="标签名（如：年龄）" class="bg-slate-800 border border-white/10 rounded-lg px-3 py-2 text-sm text-white placeholder-slate-500" />
-            <input v-model="newTrait.value" placeholder="值（如：25岁）" class="bg-slate-800 border border-white/10 rounded-lg px-3 py-2 text-sm text-white placeholder-slate-500" />
+            <input v-model="newTrait.key" placeholder="标签名（如：年龄）" class="bg-surface-secondary border border-line rounded-lg px-3 py-2 text-sm text-content placeholder-content-muted" />
+            <input v-model="newTrait.value" placeholder="值（如：25岁）" class="bg-surface-secondary border border-line rounded-lg px-3 py-2 text-sm text-content placeholder-content-muted" />
           </div>
           <div class="flex justify-end gap-2">
-            <button @click="showAddForm = false" class="text-xs px-3 py-1.5 text-slate-400 hover:text-white">取消</button>
+            <button @click="showAddForm = false" class="text-xs px-3 py-1.5 text-content-secondary hover:text-content">取消</button>
             <button @click="handleAddTrait" :disabled="!newTrait.key || !newTrait.value" class="text-xs px-4 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white disabled:opacity-30 disabled:cursor-not-allowed transition-colors">添加</button>
           </div>
         </div>
@@ -90,12 +127,12 @@
       <div
         v-for="(traits, category) in profile.traits"
         :key="category"
-        class="rounded-2xl border border-white/10 bg-white/[0.03] p-5"
+        class="rounded-2xl border border-line bg-surface-card p-4"
       >
-        <div class="flex items-center gap-2 mb-4">
-          <span class="text-lg">{{ categoryIcon(category as string) }}</span>
-          <h2 class="text-base font-semibold text-white">{{ categoryLabel(category as string) }}</h2>
-          <span class="text-xs text-slate-500">({{ (traits as any[]).length }})</span>
+        <div class="flex items-center gap-2 mb-3">
+          <span>{{ categoryIcon(category as string) }}</span>
+          <h2 class="text-sm font-semibold text-content">{{ categoryLabel(category as string) }}</h2>
+          <span class="text-[10px] text-content-muted">({{ (traits as any[]).length }})</span>
         </div>
         <div class="flex flex-wrap gap-2">
           <div
@@ -110,10 +147,10 @@
           >
             <!-- Normal display -->
             <template v-if="editingTrait?.id !== trait.id">
-              <span class="text-xs text-slate-400">{{ trait.key }}</span>
-              <span class="text-sm font-medium text-white ml-1">{{ trait.value }}</span>
+              <span class="text-xs text-content-secondary">{{ trait.key }}</span>
+              <span class="text-sm font-medium text-content ml-1">{{ trait.value }}</span>
               <!-- Edit hint on hover -->
-              <span class="text-[10px] text-slate-500 ml-1 opacity-0 group-hover:opacity-100 transition-opacity">✏️</span>
+              <span class="text-[10px] text-content-muted ml-1 opacity-0 group-hover:opacity-100 transition-opacity">✏️</span>
             </template>
             <!-- Editing mode -->
             <template v-else>
@@ -123,7 +160,7 @@
                 @click.stop
                 @keydown.enter="saveEdit(trait)"
                 @keydown.escape="cancelEdit"
-                class="bg-transparent border-b border-cyan-400/50 text-sm font-medium text-white ml-1 outline-none min-w-[5em]"
+                class="bg-transparent border-b border-cyan-400/50 text-sm font-medium text-content ml-1 outline-none min-w-[5em]"
                 :style="{ width: (editingValue.length + 2) + 'em' }"
                 ref="editInput"
                 autofocus
@@ -141,22 +178,22 @@
     </div>
 
     <!-- Decision History -->
-    <div v-if="profile?.decisions?.length" class="mt-8">
-      <h2 class="text-base font-semibold text-white mb-4">📜 决策历史</h2>
-      <div class="space-y-2">
+    <div v-if="profile?.decisions?.length" class="mt-6">
+      <h2 class="text-sm font-semibold text-content mb-3">📜 决策历史</h2>
+      <div class="space-y-1.5">
         <div
           v-for="d in (profile.decisions as any[])"
           :key="d.id"
-          class="group flex items-center gap-3 rounded-xl border border-white/5 bg-white/[0.02] px-4 py-3 hover:border-white/10 transition-colors"
+          class="group flex items-center gap-3 rounded-xl border border-line bg-surface-card px-4 py-3 hover:border-line-hover transition-colors"
         >
-          <span class="text-xs text-slate-500 shrink-0">{{ formatDate(d.created_at) }}</span>
-          <span class="text-sm text-slate-300 flex-1 truncate">{{ d.question }}</span>
-          <span v-if="d.choice_a && d.choice_b" class="text-xs text-slate-500 shrink-0">
+          <span class="text-xs text-content-muted shrink-0">{{ formatDate(d.created_at) }}</span>
+          <span class="text-sm text-content-secondary flex-1 truncate">{{ d.question }}</span>
+          <span v-if="d.choice_a && d.choice_b" class="text-xs text-content-muted shrink-0">
             {{ d.choice_a }} vs {{ d.choice_b }}
           </span>
           <button
             @click="confirmDeleteDecision(d)"
-            class="text-xs text-slate-600 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-all shrink-0"
+            class="text-xs text-content-faint hover:text-red-400 opacity-0 group-hover:opacity-100 transition-all shrink-0"
             title="删除此决策记录"
           >✕</button>
         </div>
@@ -166,19 +203,19 @@
     <!-- Loading -->
     <div v-if="!profile" class="text-center py-16">
       <span class="animate-spin inline-block">⏳</span>
-      <p class="text-sm text-slate-500 mt-2">加载中...</p>
+      <p class="text-sm text-content-muted mt-2">加载中...</p>
     </div>
 
     <!-- Delete Confirmation Dialog -->
     <Teleport to="body">
       <Transition name="fade">
         <div v-if="deleteConfirm" class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm" @click="deleteConfirm = null">
-          <div class="bg-slate-900 border border-white/10 rounded-2xl p-6 max-w-sm mx-4 shadow-2xl" @click.stop>
-            <p class="text-lg font-semibold text-white mb-2">确认删除</p>
-            <p class="text-sm text-slate-400 mb-1">{{ deleteConfirm.message }}</p>
-            <p v-if="deleteConfirm.detail" class="text-xs text-slate-500 mb-5">{{ deleteConfirm.detail }}</p>
+          <div class="bg-surface-secondary border border-line rounded-2xl p-6 max-w-sm mx-4 shadow-2xl" @click.stop>
+            <p class="text-lg font-semibold text-content mb-2">确认删除</p>
+            <p class="text-sm text-content-secondary mb-1">{{ deleteConfirm.message }}</p>
+            <p v-if="deleteConfirm.detail" class="text-xs text-content-muted mb-5">{{ deleteConfirm.detail }}</p>
             <div class="flex justify-end gap-3 mt-5">
-              <button @click="deleteConfirm = null" class="px-4 py-2 text-sm text-slate-400 hover:text-white rounded-lg hover:bg-white/5 transition-colors">取消</button>
+              <button @click="deleteConfirm = null" class="px-4 py-2 text-sm text-content-secondary hover:text-content rounded-lg hover:bg-surface-hover transition-colors">取消</button>
               <button @click="executeConfirmedDelete" class="px-4 py-2 text-sm text-white bg-red-600 hover:bg-red-500 rounded-lg transition-colors">删除</button>
             </div>
           </div>
@@ -317,7 +354,7 @@ function categoryLabel(cat: string) {
 function confidenceClass(confidence: number) {
   if (confidence >= 0.7) return 'border-emerald-500/30 bg-emerald-500/[0.05]'
   if (confidence >= 0.4) return 'border-amber-500/20 bg-amber-500/[0.03]'
-  return 'border-white/5 bg-white/[0.02]'
+  return 'border-line bg-surface-card'
 }
 
 function formatDate(dateStr: string) {

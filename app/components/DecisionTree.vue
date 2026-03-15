@@ -40,7 +40,7 @@
 
     <!-- Cross-link Legend -->
     <div v-if="data.links?.length" class="mt-6 flex flex-col items-center gap-3">
-      <p class="text-xs text-slate-500 uppercase tracking-wider">🔗 路径交叉点</p>
+      <p class="text-xs text-content-muted uppercase tracking-wider">🔗 路径交叉点</p>
       <div class="flex flex-col gap-2 max-w-lg">
         <div
           v-for="(link, i) in resolvedLinks"
@@ -61,7 +61,7 @@
         <span class="text-2xl">💡</span>
         <div>
           <p class="text-sm text-indigo-400 font-medium mb-1">路径洞察</p>
-          <p class="text-white font-semibold">{{ data.insight }}</p>
+          <p class="text-content font-semibold">{{ data.insight }}</p>
         </div>
       </div>
     </div>

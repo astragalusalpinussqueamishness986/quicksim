@@ -1,6 +1,6 @@
 <template>
   <div>
-    <NuxtLink to="/" class="inline-flex items-center gap-1 text-slate-400 hover:text-white mb-6 transition-colors">
+    <NuxtLink to="/" class="inline-flex items-center gap-1 text-content-secondary hover:text-content mb-6 transition-colors">
       ← 返回场景列表
     </NuxtLink>
 
@@ -8,7 +8,7 @@
       <span class="text-4xl">🎨</span>
       <div>
         <h1 class="text-2xl font-bold">自定义场景</h1>
-        <p class="text-slate-400">定义你自己的对比维度，AI 为你分析</p>
+        <p class="text-content-secondary">定义你自己的对比维度，AI 为你分析</p>
       </div>
     </div>
 
@@ -16,7 +16,7 @@
     <form v-if="!result" class="space-y-6 max-w-lg" @submit.prevent="runSimulation">
       <!-- Scenario name -->
       <div>
-        <label class="block text-sm font-medium text-slate-300 mb-1">场景名称</label>
+        <label class="block text-sm font-medium text-content-secondary mb-1">场景名称</label>
         <input
           v-model="scenarioName"
           type="text"
@@ -29,18 +29,18 @@
       <!-- Options -->
       <div class="grid grid-cols-2 gap-4">
         <div>
-          <label class="block text-sm font-medium text-slate-300 mb-1">选项 A</label>
+          <label class="block text-sm font-medium text-content-secondary mb-1">选项 A</label>
           <input v-model="optionA" type="text" placeholder="例如：留学" required class="input-field" />
         </div>
         <div>
-          <label class="block text-sm font-medium text-slate-300 mb-1">选项 B</label>
+          <label class="block text-sm font-medium text-content-secondary mb-1">选项 B</label>
           <input v-model="optionB" type="text" placeholder="例如：国内考研" required class="input-field" />
         </div>
       </div>
 
       <!-- Context -->
       <div>
-        <label class="block text-sm font-medium text-slate-300 mb-1">背景描述 <span class="text-slate-500">(可选)</span></label>
+        <label class="block text-sm font-medium text-content-secondary mb-1">背景描述 <span class="text-content-muted">(可选)</span></label>
         <textarea
           v-model="context"
           rows="3"
@@ -51,7 +51,7 @@
 
       <!-- Dimensions -->
       <div>
-        <label class="block text-sm font-medium text-slate-300 mb-2">对比维度 <span class="text-slate-500">(至少 3 个)</span></label>
+        <label class="block text-sm font-medium text-content-secondary mb-2">对比维度 <span class="text-content-muted">(至少 3 个)</span></label>
         <div class="space-y-2">
           <div v-for="(dim, i) in dimensions" :key="i" class="flex gap-2">
             <input
@@ -63,7 +63,7 @@
             <button
               v-if="dimensions.length > 3"
               type="button"
-              class="px-3 rounded-xl border border-white/10 text-slate-500 hover:text-red-400 hover:border-red-500/30 transition-colors"
+              class="px-3 rounded-xl border border-line text-content-muted hover:text-red-400 hover:border-red-500/30 transition-colors"
               @click="removeDimension(i)"
             >
               ✕
@@ -83,11 +83,11 @@
       <button
         type="submit"
         :disabled="loading || !isFormValid"
-        class="w-full py-3 rounded-xl font-semibold text-white bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 disabled:opacity-50 transition-all"
+        class="w-full py-3 rounded-xl font-semibold text-content bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 disabled:opacity-50 transition-all"
       >
         {{ loading ? '⏳ AI 正在推演...' : '🚀 开始推演' }}
       </button>
-      <p v-if="loading" class="text-sm text-slate-500 text-center">预计需要 10-20 秒，请稍候...</p>
+      <p v-if="loading" class="text-sm text-content-muted text-center">预计需要 10-20 秒，请稍候...</p>
     </form>
 
     <!-- ===== Structured Results ===== -->
@@ -98,7 +98,7 @@
 
       <!-- 1. Summary Banner -->
       <div class="rounded-2xl bg-gradient-to-r from-purple-500 to-pink-500 p-[1px]">
-        <div class="rounded-2xl bg-slate-900 p-5 text-center">
+        <div class="rounded-2xl bg-surface-secondary p-5 text-center">
           <p class="text-xl font-bold">{{ result.summary }}</p>
         </div>
       </div>
@@ -108,25 +108,25 @@
         <div
           v-for="(m, i) in result.metrics"
           :key="i"
-          class="rounded-xl border border-white/10 bg-white/5 p-4 text-center"
+          class="rounded-xl border border-line bg-surface-card p-4 text-center"
         >
-          <p class="text-xs text-slate-500 mb-2">{{ m.label }}</p>
+          <p class="text-xs text-content-muted mb-2">{{ m.label }}</p>
           <div class="flex items-center justify-center gap-3">
             <span
               class="text-sm font-semibold"
-              :class="m.winner === 'A' ? 'text-cyan-400' : 'text-slate-300'"
+              :class="m.winner === 'A' ? 'text-cyan-400' : 'text-content-secondary'"
             >{{ m.valueA }}</span>
-            <span class="text-xs text-slate-600">vs</span>
+            <span class="text-xs text-content-faint">vs</span>
             <span
               class="text-sm font-semibold"
-              :class="m.winner === 'B' ? 'text-amber-400' : 'text-slate-300'"
+              :class="m.winner === 'B' ? 'text-amber-400' : 'text-content-secondary'"
             >{{ m.valueB }}</span>
           </div>
         </div>
       </div>
 
       <!-- 3. Radar Chart -->
-      <div class="rounded-2xl border border-white/10 bg-white/5 p-6">
+      <div class="rounded-2xl border border-line bg-surface-card p-6">
         <CompareChart :chart-data="result.chartData" />
       </div>
 
@@ -135,13 +135,13 @@
         <h3 class="text-lg font-semibold mb-4">📖 推演时间线</h3>
         <div class="relative pl-8 border-l-2 border-purple-500/30 space-y-6">
           <div v-for="(phase, i) in result.phases" :key="i" class="relative">
-            <div class="absolute -left-[25px] w-4 h-4 rounded-full bg-purple-500 border-2 border-slate-900" />
-            <div class="rounded-xl border border-white/10 bg-white/5 p-4 hover:bg-white/10 transition-colors">
+            <div class="absolute -left-[25px] w-4 h-4 rounded-full bg-purple-500 border-2 border-surface-secondary" />
+            <div class="rounded-xl border border-line bg-surface-card p-4 hover:bg-surface-hover transition-colors">
               <div class="flex items-center gap-2 mb-2">
                 <span class="text-lg">{{ phase.icon }}</span>
-                <h4 class="font-semibold text-white">{{ phase.title }}</h4>
+                <h4 class="font-semibold text-content">{{ phase.title }}</h4>
               </div>
-              <p class="text-sm text-slate-300 leading-relaxed">{{ phase.content }}</p>
+              <p class="text-sm text-content-secondary leading-relaxed">{{ phase.content }}</p>
             </div>
           </div>
         </div>
@@ -153,34 +153,34 @@
           <span class="text-2xl">🎯</span>
           <div>
             <p class="text-sm text-purple-400 font-medium mb-1">AI 结论</p>
-            <p class="text-white font-semibold">{{ result.verdict }}</p>
+            <p class="text-content font-semibold">{{ result.verdict }}</p>
           </div>
         </div>
       </div>
 
       <!-- Watermark for export -->
-      <div class="text-center text-xs text-slate-600 pt-2">QuickSim — AI 人生场景速推</div>
+      <div class="text-center text-xs text-content-faint pt-2">QuickSim — AI 人生场景速推</div>
 
       </div><!-- end resultRef -->
 
       <!-- Actions -->
       <div class="flex flex-wrap gap-3 pt-2">
         <button
-          class="px-6 py-2 rounded-xl border border-white/10 hover:bg-white/10 transition-colors"
+          class="px-6 py-2 rounded-xl border border-line hover:bg-surface-hover transition-colors"
           @click="reset"
         >
           🔄 重新推演
         </button>
         <button
           :disabled="exporting"
-          class="px-6 py-2 rounded-xl border border-white/10 hover:bg-white/10 transition-colors disabled:opacity-50"
+          class="px-6 py-2 rounded-xl border border-line hover:bg-surface-hover transition-colors disabled:opacity-50"
           @click="handleExport"
         >
           {{ exporting ? '📸 导出中...' : '📸 导出为图片' }}
         </button>
         <NuxtLink
           to="/"
-          class="px-6 py-2 rounded-xl border border-white/10 hover:bg-white/10 transition-colors"
+          class="px-6 py-2 rounded-xl border border-line hover:bg-surface-hover transition-colors"
         >
           🎲 换个场景
         </NuxtLink>
@@ -260,7 +260,7 @@ function handleExport() {
 
 <style scoped>
 .input-field {
-  @apply w-full rounded-xl bg-white/5 border border-white/10 px-4 py-3 text-white placeholder-slate-500 focus:border-purple-500 focus:ring-1 focus:ring-purple-500 outline-none transition-colors;
+  @apply w-full rounded-xl bg-surface-card border border-line px-4 py-3 text-content placeholder-content-muted focus:border-purple-500 focus:ring-1 focus:ring-purple-500 outline-none transition-colors;
 }
 .animate-fade-in {
   animation: fadeIn 0.5s ease-out;

@@ -1,6 +1,6 @@
 <template>
   <div>
-    <NuxtLink to="/" class="inline-flex items-center gap-1 text-slate-400 hover:text-white mb-6 transition-colors">
+    <NuxtLink to="/" class="inline-flex items-center gap-1 text-content-secondary hover:text-content mb-6 transition-colors">
       ← 返回首页
     </NuxtLink>
 
@@ -9,19 +9,19 @@
       <span class="text-4xl">🌳</span>
       <div>
         <h1 class="text-2xl font-bold">决策路径树</h1>
-        <p class="text-slate-400">输入一个选择，AI 推导多层连锁结果</p>
+        <p class="text-content-secondary">输入一个选择，AI 推导多层连锁结果</p>
       </div>
     </div>
 
     <!-- After started: show user's question as title -->
     <div v-if="started" class="mb-6">
-      <h1 class="text-xl font-bold text-white">🌳 {{ question }}</h1>
+      <h1 class="text-xl font-bold text-content">🌳 {{ question }}</h1>
     </div>
 
     <!-- Input Form -->
     <form v-if="!started" class="space-y-4 max-w-lg" @submit.prevent="generate">
       <div>
-        <label class="block text-sm font-medium text-slate-300 mb-1">你面临的选择</label>
+        <label class="block text-sm font-medium text-content-secondary mb-1">你面临的选择</label>
         <input
           v-model="question"
           type="text"
@@ -32,7 +32,7 @@
       </div>
 
       <div>
-        <label class="block text-sm font-medium text-slate-300 mb-1">背景描述 <span class="text-slate-500">(可选，更精准)</span></label>
+        <label class="block text-sm font-medium text-content-secondary mb-1">背景描述 <span class="text-content-muted">(可选，更精准)</span></label>
         <textarea
           v-model="userContext"
           rows="2"
@@ -43,7 +43,7 @@
 
       <!-- Skill toggles -->
       <div class="space-y-2">
-        <p class="text-xs text-slate-500">启用的 Skills</p>
+        <p class="text-xs text-content-muted">启用的 Skills</p>
         <div class="flex flex-wrap gap-2">
           <label
             v-for="skill in availableSkills"
@@ -51,7 +51,7 @@
             class="flex items-center gap-2 px-3 py-1.5 rounded-lg border cursor-pointer transition-all text-sm"
             :class="enabledSkills.has(skill.id)
               ? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-300'
-              : 'border-white/10 bg-white/[0.02] text-slate-400 hover:bg-white/5'"
+              : 'border-line bg-surface-card text-content-secondary hover:bg-surface-hover'"
           >
             <input
               v-model="enabledSkillsList"
@@ -67,7 +67,7 @@
 
       <button
         type="submit"
-        class="w-full py-3 rounded-xl font-semibold text-white bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 transition-all"
+        class="w-full py-3 rounded-xl font-semibold text-content bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 transition-all"
       >
         🌳 生成决策路径树
       </button>
@@ -97,11 +97,11 @@
       </div>
 
       <!-- Tree loading indicator -->
-      <div v-if="treeLoading" class="rounded-2xl border border-white/10 bg-white/[0.03] p-5">
-        <div class="flex items-center gap-2 text-sm text-slate-400">
+      <div v-if="treeLoading" class="rounded-2xl border border-line bg-surface-card p-5">
+        <div class="flex items-center gap-2 text-sm text-content-secondary">
           <span class="inline-block animate-spin">🌳</span>
           <span>正在推导决策路径树...</span>
-          <span class="text-xs text-slate-600">（约 15-30 秒）</span>
+          <span class="text-xs text-content-faint">（约 15-30 秒）</span>
         </div>
       </div>
 
@@ -111,21 +111,21 @@
       <!-- Actions -->
       <div v-if="treeData" class="flex flex-wrap gap-3 pt-4">
         <button
-          class="px-6 py-2 rounded-xl border border-white/10 hover:bg-white/10 transition-colors"
+          class="px-6 py-2 rounded-xl border border-line hover:bg-surface-hover transition-colors"
           @click="reset"
         >
           🔄 重新生成
         </button>
         <button
           :disabled="exporting"
-          class="px-6 py-2 rounded-xl border border-white/10 hover:bg-white/10 transition-colors disabled:opacity-50"
+          class="px-6 py-2 rounded-xl border border-line hover:bg-surface-hover transition-colors disabled:opacity-50"
           @click="handleExport"
         >
           {{ exporting ? '📸 导出中...' : '📸 导出为图片' }}
         </button>
         <NuxtLink
           to="/"
-          class="px-6 py-2 rounded-xl border border-white/10 hover:bg-white/10 transition-colors"
+          class="px-6 py-2 rounded-xl border border-line hover:bg-surface-hover transition-colors"
         >
           🏠 返回首页
         </NuxtLink>
@@ -394,6 +394,6 @@ function handleExport() {
 
 <style scoped>
 .input-field {
-  @apply w-full rounded-xl bg-white/5 border border-white/10 px-4 py-3 text-white placeholder-slate-500 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-colors;
+  @apply w-full rounded-xl bg-surface-card border border-line px-4 py-3 text-content placeholder-content-muted focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-colors;
 }
 </style>

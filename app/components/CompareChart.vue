@@ -14,23 +14,25 @@ import type { ChartData } from '~/types'
 
 use([RadarChart, BarChart, TitleComponent, TooltipComponent, LegendComponent, RadarComponent, GridComponent, CanvasRenderer])
 
+const { chartColors } = useChartTheme()
 const props = defineProps<{ chartData: ChartData }>()
 
 const chartOption = computed(() => {
+  const colors = chartColors.value
   if (props.chartData.type === 'radar') {
     return {
       tooltip: {},
       legend: {
         bottom: 0,
-        textStyle: { color: '#94a3b8' },
+        textStyle: { color: colors.textSecondary },
       },
       radar: {
         indicator: props.chartData.labels.map(l => ({ name: l, max: 100 })),
         shape: 'circle',
-        axisName: { color: '#cbd5e1' },
-        splitArea: { areaStyle: { color: ['rgba(99,102,241,0.05)', 'rgba(99,102,241,0.1)'] } },
-        splitLine: { lineStyle: { color: 'rgba(255,255,255,0.1)' } },
-        axisLine: { lineStyle: { color: 'rgba(255,255,255,0.1)' } },
+        axisName: { color: colors.textSecondary },
+        splitArea: { areaStyle: { color: colors.splitAreaColors } },
+        splitLine: { lineStyle: { color: colors.gridLineColor } },
+        axisLine: { lineStyle: { color: colors.gridLineColor } },
       },
       series: [{
         type: 'radar',
@@ -48,19 +50,19 @@ const chartOption = computed(() => {
     tooltip: { trigger: 'axis' },
     legend: {
       bottom: 0,
-      textStyle: { color: '#94a3b8' },
+      textStyle: { color: colors.textSecondary },
     },
     grid: { left: '3%', right: '4%', bottom: '15%', containLabel: true },
     xAxis: {
       type: 'category',
       data: props.chartData.labels,
-      axisLabel: { color: '#94a3b8' },
-      axisLine: { lineStyle: { color: 'rgba(255,255,255,0.1)' } },
+      axisLabel: { color: colors.textSecondary },
+      axisLine: { lineStyle: { color: colors.gridLineColor } },
     },
     yAxis: {
       type: 'value',
-      axisLabel: { color: '#94a3b8' },
-      splitLine: { lineStyle: { color: 'rgba(255,255,255,0.1)' } },
+      axisLabel: { color: colors.textSecondary },
+      splitLine: { lineStyle: { color: colors.gridLineColor } },
     },
     series: props.chartData.datasets.map(ds => ({
       name: ds.label,
