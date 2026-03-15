@@ -85,10 +85,28 @@
     </div>
 
     <!-- Empty state -->
-    <div v-if="profile && traitCount === 0" class="text-center py-16">
+    <div v-if="profile && traitCount === 0" class="text-center py-12 px-6 rounded-2xl border-2 border-dashed border-content-faint/30 bg-surface-card">
       <p class="text-6xl mb-4">🌱</p>
-      <p class="text-lg text-content-secondary">画像还是空白的</p>
-      <p class="text-sm text-content-muted mt-2">去<NuxtLink to="/tree" class="text-emerald-400 hover:underline">决策树</NuxtLink>提问几个问题，AI 会自动学习你的特征</p>
+      <p class="text-xl font-semibold text-content mb-2">欢迎！建立你的 AI 决策画像</p>
+      <p class="text-sm text-content-secondary mb-6 max-w-md mx-auto">
+        「决策画像」是 AI 根据你提出的每个选择问题，自动识别的个人特征标签——包括年龄、城市、职业、价值观、生活状态等。
+      </p>
+
+      <div class="inline-block text-left rounded-xl border border-line bg-surface p-4 mb-6">
+        <p class="text-xs text-content-muted mb-2">📌 例如，你问「该不该裸辞去创业」，AI 会提取：</p>
+        <div class="flex flex-wrap gap-1.5">
+          <span class="px-2 py-1 rounded-lg bg-emerald-500/15 text-emerald-500 text-xs">💼 工作中</span>
+          <span class="px-2 py-1 rounded-lg bg-amber-500/15 text-amber-500 text-xs">🎲 冒险倾向</span>
+          <span class="px-2 py-1 rounded-lg bg-violet-500/15 text-violet-500 text-xs">🌱 追求成长</span>
+        </div>
+      </div>
+
+      <div>
+        <NuxtLink to="/tree" class="inline-block px-6 py-3 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-semibold transition-all">
+          🌳 去问一个决策问题 →
+        </NuxtLink>
+        <p class="text-xs text-content-faint mt-3">每次决策后画像都会自动丰富</p>
+      </div>
     </div>
 
     <!-- Trait cards by category -->
